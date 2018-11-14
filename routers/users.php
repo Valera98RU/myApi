@@ -26,7 +26,7 @@
             if(!empty($user->login))
             {
             echo json_encode(array(
-                'answer'=>array(
+             'answer'=>array(
                     'type'=>'user',
                     'content'=>array(
                         'id'=>$user->id,

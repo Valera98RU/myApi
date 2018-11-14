@@ -32,8 +32,7 @@
                         'id'=>$user->id,
                         'login'=>$user->login,
                         'name'=>$user->name,
-                        'email'=>$user->email,
-                        'key'=>$_SESSION['key']
+                        'email'=>$user->email                        
                     )
                 )
             ));
@@ -163,7 +162,7 @@
             $name = $formData['user_name'];
             $email = $formData['user_email'];
 
-            if(!password_verify($key,$_SESSION['key']))
+            if(password_verify($key,$_SESSION['key']))
             {
             $action = new UserAction();
 
@@ -176,8 +175,8 @@
             {
                 header('HTTP/1.0 401 Unauthorized');
                 echo json_encode(array(
-                    'error'=>array(
-                        'type'=>'Unauthorized',
+                    'ansver'=>array(
+                        'type'=>'error',
                         'key'=>'key does not fit'
                     )
                 ));

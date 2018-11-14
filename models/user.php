@@ -138,8 +138,12 @@
             $user = R::load('tusers',$user_id);
             if(empty($user->login))
             {
+                header('HTTP/1.0 404 Not Found');
                 return json_encode(array(
-                    'error'=>'user not found'
+                    'ansver'=>array(
+                        'type'=>'error',
+                        'key'=>'user not found'
+                    )
                 ));
             }
             else
@@ -148,7 +152,10 @@
                 $user->email = $email;
                 R::store($user);
                 return json_encode(array(
-                    'message'=>'ok'
+                    'ansver'=>array(
+                        'type'=>'ok',
+                        'key'=>'user updating'
+                    )
                 ));
             }
         }
@@ -162,10 +169,21 @@
             if(!empty($Fsity->id))
             {
                 R::trash($Fsity);
-                return true;
+                return return json_encode(array(
+                    'ansver'=>array(
+                        'type'=>'ok',
+                        'key'=>'deleted'
+                    )
+                ));
             }
             else
-            return false;
+            header('HTTP/1.0 404 Not Found')
+            return return json_encode(array(
+                'ansver'=>array(
+                    'type'=>'error',
+                    'key'=>'not found'
+                )
+            ));;
         }
     }
 ?>

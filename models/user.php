@@ -21,19 +21,46 @@
         public function SingUp ($Login, $Password, $Name, $Email)
         {
             if(isset($Login) && isset($Password))
-            {
+            {   
+                $user= R::findOne('tusers','login = ? or email = ?',array($Login,$Email));
+                if(empty($user))
+                {
+                
                 $user= R::dispense('tusers');
                 $user->login = $Login;
                 $user->password = password_hash($Password,PASSWORD_DEFAULT);
                 $user->name = $Name;
                 $user->email = $Email;
                 R::store($user);
-                return true;
+                header('HTTP/1.0 200 OK');
+                return json_encode(array(
+                    'answer'=>array(
+                        'type'=>'OK',
+                        'contain'=>'OK'
+                    )
+                ));
+                }
+                else
+                {
+                    header('HTTP/1.1 409 Conflict');
+                    return json_encode(array(
+                        'answer'=>array(
+                            'type'=>'error',
+                            'contant'=>'User with such login or email is already registered'
+                        )
+                    ));
+                }
             }
             else
+            {
+            header('HTTP/1.1 406 Not Acceptable');
             echo json_encode(array(
-                'error'=>'Bad parametrs'
+                'answer'=>array(
+                    'type'=>'error',
+                    'contant'=>'login and password fields must not empty'
+                )
             ));
+        }
         }
         //авторизация  пользователя
         public function SingIn($Login,$Password)
@@ -46,8 +73,9 @@
                     if(password_verify($Password,$user->password))
                     {
                         $_SESSION['key']=password_hash($user->id,PASSWORD_DEFAULT);
+                        header('HTTP/1.0 200 OK');
                         return json_encode(array(
-                            'ansver'=>array(
+                            'answer'=>array(
                                 'type'=>'user',
                                 'content'=>array(
                             'id'=>$user->id,
@@ -58,6 +86,7 @@
                         
                     }
                     else
+                    header('HTTP/1.0 404 Not Found');
                     return json_encode(array(
                         'answer'=>array(
                             'type'=>'error',
@@ -66,6 +95,7 @@
                     ));
                 }
                 else
+                header('HTTP/1.0 404 Not Found');
                 return json_encode(array(
                     'answer'=>array(
                         'type'=>'error',
@@ -80,6 +110,37 @@
         //добавление города в список избранного
         public function AddSityInFavorite($idUser,$idSity)
         {
+            if(is_numeric($idUser))
+            {
+                $idUser = intval($idUser); 
+            }
+            else{
+                header('HTTP/1.1 406 Not Acceptable');
+                return json_encode(array(
+                    'answer'=>array(
+                        'type'=>'error',
+                        'content'=>'user_id must be intager'
+                )
+            ));
+            }
+            
+            if(is_numeric($idSity))
+            {
+                
+            $idSity = intval($idSity);
+            
+            }
+            else
+            {
+                header('HTTP/1.1 406 Not Acceptable');
+            return json_encode(array(
+                'answer'=>array(
+                    'type'=>'error',
+                    'content'=>'sity_id must be intager'
+                )
+            ));
+            }
+            
             //
             if(isset($idUser))
             {
@@ -88,7 +149,13 @@
             //
             if(empty($user->login))
             {
-                return json_encode(array('message'=> '404 User Not Found'));
+                header('HTTP/1.0 404 Not Found');
+                return json_encode(array(
+                'answer'=>array(
+                    'type'=>'error',
+                    'content'=>'user not found'
+                )
+            ));
             }
             //
             if(isset($idSity))
@@ -98,17 +165,26 @@
             //
             if(empty($sity->name))
             {
-            return json_encode(array(
-                'message'=>'404 Sity Not Found'
-            ));
+                header('HTTP/1.0 404 Not Found');
+                return json_encode(array(
+                    'answer'=>array(
+                        'type'=>'error',
+                        'content'=>'Sity not found'
+                    )
+                ));
+         
             }
             //
             if(isset($user) && isset($sity))
             {
                 $user->sharedSityList[] = $sity;
                 R::store($user);
+                header('HTTP/1.0 200 OK');
                 return json_encode(array(
-                    'message'=>'OK'
+                    'answer'=>array(
+                        'type'=>'OK',
+                        'content'=>'OK'
+                    )
                 ));
             }
             
@@ -121,13 +197,18 @@
             $user = R::findOne('tusers','id = ?',array($user_id));
             if(empty($user))
             {
+                header('HTTP/1.0 404 Not Found');
                 return json_encode(array(
-                    'error'=> ' 404 user not found'
+                    'answer'=>array(
+                        'type'=>'error',
+                        'content'=>'User not found'
+                    )
                 ));
             }
             else
             {
                 $list = $user->sharedSityList;
+                header('HTTP/1.0 200 OK');
                 return json_encode($list);
             }
         }
@@ -140,7 +221,7 @@
             {
                 header('HTTP/1.0 404 Not Found');
                 return json_encode(array(
-                    'ansver'=>array(
+                    'answer'=>array(
                         'type'=>'error',
                         'key'=>'user not found'
                     )
@@ -151,9 +232,10 @@
                 $user->name = $name;
                 $user->email = $email;
                 R::store($user);
+                header('HTTP/1.0 200 OK');
                 return json_encode(array(
-                    'ansver'=>array(
-                        'type'=>'ok',
+                    'answer'=>array(
+                        'type'=>'OK',
                         'key'=>'user updating'
                     )
                 ));
@@ -169,17 +251,18 @@
             if(!empty($Fsity->id))
             {
                 R::trash($Fsity);
-                return return json_encode(array(
-                    'ansver'=>array(
-                        'type'=>'ok',
+                header('HTTP/1.0 200 OK');
+                return  json_encode(array(
+                    'answer'=>array(
+                        'type'=>'OK',
                         'key'=>'deleted'
                     )
                 ));
             }
             else
-            header('HTTP/1.0 404 Not Found')
-            return return json_encode(array(
-                'ansver'=>array(
+            header('HTTP/1.0 404 Not Found');
+            return json_encode(array(
+                'answer'=>array(
                     'type'=>'error',
                     'key'=>'not found'
                 )

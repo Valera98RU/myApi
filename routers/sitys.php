@@ -24,9 +24,15 @@
             echo json_encode($SityList);
             }
             else
+            {
+            header('HTTP/1.1 406 Not Acceptable');
             echo json_encode(array(
-                'error'=>'Bad parametrs'
+                'answer'=>array(
+                    'type'=>'error',
+                    'contant'=>'page number must be intager'
+                )
             ));
+            }   
             return;
         }
         //поиск городов по названию
@@ -41,7 +47,10 @@
         }
         header('HTTP/1.0 400 Bad Request');
         echo json_encode(array(
-            'error' => 'Bad Request'
+            'answer'=>array(
+                'type'=>'error',
+                'contant'=>'This attribute does not support such a request'
+            )
         ));
     }
 ?>

@@ -12,6 +12,7 @@
             //Вытаскиваем пользователя из базы данных
             if(!is_numeric($user_id))
             {
+                header('HTTP/1.1 406 Not Acceptable');
                 echo json_encode(array(
                     'answer'=>array(
                         'type'=>'error',
@@ -19,6 +20,7 @@
 
                     )
                 ));
+                return;
             }
             $action= new UserAction();
            $user= $action->GETUser($user_id);
@@ -48,9 +50,7 @@
                 ));
             }
             return;
-        }
-
-        //возврвт ошибок
+        }       
         //регистрация пользователя
         //api_weather/users POST: login(str) password(str) name(str) email(str)
         if($method === 'POST' && empty($urlData) && isset($formData['name']) && isset($formData['email']))
@@ -60,11 +60,7 @@
             $count = $action->SingUp($formData['login'],$formData['password'],$formData['name'],$formData['email']);
 
             //echo $count;
-            echo json_encode(array(
-                'Method'=>'POST',
-                'formData'=>$formData,
-                'count'=>$count
-            ));
+            echo $count;
             return;
         }
         //авторезайия пользователя
@@ -86,33 +82,20 @@
         if($method === 'POST' && empty($urlData) && isset($formData['user_id']) && isset($formData['sity_id']))
         {
             $key = $formData['key'];
-
-            if(!password_verify($key,$_SESSION['key']))            
+            $idUser = $formData['user_id'];
+            $idSity = $formData['sity_id'];
+            if(!password_verify($idUser,$_SESSION['key']) && $key != $_SESSION['key'])            
             {
                 header('HTTP/1.0 401 Unauthorized');
                 echo json_encode(array(
-                    'ansver'=>array(
+                    'answer'=>array(
                         'type'=>'error',
                         'content'=>'key does not fit'
                     )
                 ));
                 return;
             }
-            if(is_numeric($formData['user_id']))
-            {
-            $idUser = intval($formData['user_id']);
-            echo 'user_id проверено'.$idUser.'';
-            }
-            else
-            echo 'user_id не int'.$idUser.'';
-            if(is_numeric($formData['sity_id']))
-            {
-                
-            $idSity = intval($formData['sity_id']);
-            echo 'sity_id проверено'.$idSity.'';
-            }
-            else
-            echo 'sity_id не int'.$idSity.'';
+            
 
             $action = new UserAction(); 
             $result = $action->AddSityInFavorite($idUser,$idSity);
@@ -126,11 +109,11 @@
         {
             $user_id = $urlData[0];
             $key = $urlData[1];
-            if(!password_verify($key,$_SESSION['key']))            
+            if(!password_verify($user_id,$_SESSION['key']) && $key != $_SESSION['key'])            
             {
                 header('HTTP/1.0 401 Unauthorized');
                 echo json_encode(array(
-                    'ansver'=>array(
+                    'answer'=>array(
                         'type'=>'error',
                         'content'=>'key does not fit'
                     )
@@ -161,8 +144,8 @@
             $user_id = $formData['user_id'];
             $name = $formData['user_name'];
             $email = $formData['user_email'];
-
-            if(password_verify($key,$_SESSION['key']))
+            $key = $formData['key'];
+            if(!password_verify($user_id,$_SESSION['key']) && $key != $_SESSION['key'])            
             {
             $action = new UserAction();
 
@@ -175,7 +158,7 @@
             {
                 header('HTTP/1.0 401 Unauthorized');
                 echo json_encode(array(
-                    'ansver'=>array(
+                    'answer'=>array(
                         'type'=>'error',
                         'key'=>'key does not fit'
                     )
@@ -194,7 +177,7 @@
             $user_id = $formData['user_id'];
             $sity_id = $formData['sity_id'];
             $key = $formData['key'];
-            if(password_verify($key,$_SESSION['key']))
+            if(!password_verify($user_id,$_SESSION['key']) && $key != $_SESSION['key'])            
             {
             if(is_numeric($user_id) && is_numeric($sity_id))
             {
@@ -210,7 +193,7 @@
 {
             header('HTTP/1.1  406 Not Acceptable');
             echo json_encode(array(
-                'ansver'=>array(
+                'answer'=>array(
                     'type'=>'error',
                     'content'=>'arguments must be integer'
                 )
@@ -222,7 +205,7 @@
         {
             header('HTTP/1.0 401 Unauthorized');
             echo json_encode(array(
-                'ansver'=>array(
+                'answer'=>array(
                     'type'=>'error',
                     'content'=>'key does not fit'
                 )
@@ -233,7 +216,7 @@
 
         header('HTTP/1.0 400 Bad Request');
         echo json_encode(array(
-            'ansver'=>array(
+            'answer'=>array(
                 'type'=>'error',
                 'content'=>'Bad Request'
             )

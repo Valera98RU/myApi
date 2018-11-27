@@ -9,7 +9,7 @@
                 
                 if(isset($id))
                 {
-                    $user = R::load('TUsers',$id);
+                    $user = R::load('tusers',$id);
 
                     
                 return $user;

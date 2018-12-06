@@ -55,7 +55,7 @@
         //api_weather/users POST: login(str) password(str) name(str) email(str)
         if($method === 'POST' && empty($urlData) && isset($formData['name']) && isset($formData['email']))
         {
-            $action = new UserAction();
+            $action = new UserAction(); 
            
             $count = $action->SingUp($formData['login'],$formData['password'],$formData['name'],$formData['email']);
 
@@ -131,8 +131,13 @@
             }
             else
             {
+                header('HTTP/1.1 406 Not Acceptable');
                 echo json_encode(array(
-                    'error'=>'id is not integer'
+                    'answer'=>array(
+                        'type'=>'error',
+                        'content'=>'deb argument'
+
+                    )
                 ));
                 return;
             }
@@ -170,48 +175,59 @@
         //DeletFavoriteSity
         //удаление записи из таблицы избраных городов
         //api_weather/users
-        if($method='DELET' && empty($urlData))
+        if($method='DELETE' && empty($urlData) )
         {
             $action = new UserAction();
-
+           
             $user_id = $formData['user_id'];
             $sity_id = $formData['sity_id'];
             $key = $formData['key'];
-            if(!password_verify($user_id,$_SESSION['key']) && $key != $_SESSION['key'])            
+            if(empty($user_id) && empty($sity_id))
             {
-            if(is_numeric($user_id) && is_numeric($sity_id))
-            {
-                $user_id = intval($user_id);
-                $sity_id = intval($sity_id);
-
-                $result = $action->DeletFavoriteSity($user_id,$sity_id);
-
-                echo $result;
+                header('HTTP/1.1 406 Not Acceptable');
+                echo json_encode(array(
+                    'answer'=>array(
+                        'type'=>'error',
+                        'content'=>'argument is empty'
+                    )
+                ));
                 return;
             }
+            if(!password_verify($user_id,$_SESSION['key']) && $key != $_SESSION['key'])            
+            {
+                if(is_numeric($user_id) && is_numeric($sity_id))
+                {
+                    $user_id = intval($user_id);
+                    $sity_id = intval($sity_id);
+
+                    $result = $action->DeletFavoriteSity($user_id,$sity_id);
+
+                    echo $result;
+                    return;
+                }
+                else
+                {
+                    header('HTTP/1.1  406 Not Acceptable');
+                    echo json_encode(array(
+                        'answer'=>array(
+                            'type'=>'error',
+                            'content'=>'arguments must be integer'
+                         )
+                    ));
+                    return;
+                }
+            }
             else
-{
-            header('HTTP/1.1  406 Not Acceptable');
-            echo json_encode(array(
-                'answer'=>array(
-                    'type'=>'error',
-                    'content'=>'arguments must be integer'
-                )
-            ));
-            return;
-        }
-        }
-        else
-        {
-            header('HTTP/1.0 401 Unauthorized');
-            echo json_encode(array(
-                'answer'=>array(
-                    'type'=>'error',
-                    'content'=>'key does not fit'
-                )
-            ));
-            return;
-        }
+            {
+                header('HTTP/1.0 401 Unauthorized');
+                echo json_encode(array(
+                    'answer'=>array(
+                        'type'=>'error',
+                        'content'=>'key does not fit'
+                    )
+                ));
+                return;
+            }
         }
 
         header('HTTP/1.0 400 Bad Request');

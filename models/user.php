@@ -22,7 +22,7 @@
         {
             if(isset($Login) && isset($Password))
             {   
-                $user= R::findOne('tusers','login = ? or email = ?',array($Login,$Email));
+                $user= R::findO ne('tusers','login = ? or email = ?',array($Login,$Email));
                 if(empty($user))
                 {
                 
@@ -68,7 +68,7 @@
             if(isset($Login) && isset($Password))
             {
                 $user = R::findOne('tusers','login = ?',array($Login));   
-                if(isset($user))
+                if(isset($user)) 
                 {
                     if(password_verify($Password,$user->password))
                     {
@@ -173,7 +173,7 @@
                     )
                 ));
          
-            }
+            }+
             //
             if(isset($user) && isset($sity))
             {

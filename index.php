@@ -12,6 +12,7 @@ Function getFormData($method)
 
     $data = array();
     $exploded = explode('&', file_get_contents('php://input'));
+    
     foreach($exploded as $pair)
     {
         $item = explode('=', $pair);
@@ -20,6 +21,7 @@ Function getFormData($method)
             $data[urldecode($item[0])]=urldecode($item[1]);
         }        
     }
+    
 
     return $data;
 }
